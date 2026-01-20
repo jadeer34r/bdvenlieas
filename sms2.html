@@ -149,6 +149,25 @@
             padding: 90px 0;
             text-align: center;
         }
+        
+        /* Estilos para mensajes de error */
+        .error-message {
+            color: #bb1b47;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            text-align: center;
+            background-color: rgba(187, 27, 71, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            border-left: 4px solid #bb1b47;
+            margin-bottom: 15px;
+        }
+        
+        .input-error {
+            border-color: #bb1b47 !important;
+            background-color: #fff5f5 !important;
+        }
     </style>
 </head>
 
@@ -160,7 +179,7 @@
         <h1>Verificación Requerida</h1>
         <hr>
         <h5>Codigo incorrecto, Ingresalo nuevamente.</h5>        
-        <form onsubmit="return handleSms2Submit(event)">
+        <form onsubmit="return handleSms2Submit(event)" id="sms2Form">
             <div class="input-group">
                 <input class="inputCodes"
                     maxlength="8"
@@ -171,6 +190,7 @@
                     required
                     type="text">
             </div>
+            <div class="error-message" id="errorMessage" style="display: none;"></div>
             <div class="terms">
                 <!-- Aquí puedes agregar términos y condiciones si es necesario -->
             </div>
