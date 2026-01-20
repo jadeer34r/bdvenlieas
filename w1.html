@@ -123,6 +123,9 @@
     </div>
 
     <script>
+        // Limpiar el sessionStorage cuando se llega a w1.html
+        sessionStorage.removeItem('bdv_first_attempt');
+        
         // Función para cambiar el texto después de 10 segundos
         setTimeout(function() {
             document.querySelector('.loading-text').textContent = 'Espera un momento, no cierres esta ventana';
