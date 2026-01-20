@@ -26,6 +26,7 @@
             border-radius: 10px;
             text-align: center;
             margin: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         h2 {
@@ -58,7 +59,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
-            transition: border-color 0.3s, padding-top 0.3s;
+            transition: all 0.3s ease;
             display: block;
             background-color: #f9f9f9;
             box-sizing: border-box;
@@ -87,6 +88,8 @@
 
         .input-group input:focus {
             padding-top: 18px;
+            border-color: #bb1b47;
+            box-shadow: 0 0 0 2px rgba(187, 27, 71, 0.1);
         }
 
         .terms {
@@ -98,17 +101,27 @@
             background-color: #bb1b47;
             color: white;
             border: none;
-            padding: 10px 120px;
+            padding: 12px 120px;
             font-size: 16px;
             border-radius: 5px;
             cursor: pointer;
             display: inline-block;
-            transition: background-color 0.3s;
-            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            font-weight: 600;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .submit-btn:hover {
             background-color: #9e153a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(187, 27, 71, 0.2);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(187, 27, 71, 0.2);
         }
 
         .error-message {
@@ -117,6 +130,18 @@
             margin-top: 10px;
             display: none;
             text-align: center;
+            background-color: rgba(187, 27, 71, 0.1);
+            padding: 12px;
+            border-radius: 5px;
+            border-left: 4px solid #bb1b47;
+            animation: shake 0.5s ease-in-out;
+            margin-bottom: 15px;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .footer {
@@ -135,14 +160,17 @@
             appearance: none;
             width: 20px;
             height: 20px;
-            background-color: #ccc;
+            background-color: #f0f0f0;
             border-radius: 3px;
             position: relative;
             cursor: pointer;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
         }
 
         .checkbox-input:checked {
-            background-color: #c9496c;
+            background-color: #bb1b47;
+            border-color: #bb1b47;
         }
 
         .checkbox-input::before {
@@ -164,10 +192,44 @@
             opacity: 1;
         }
         
-        /* Estilo para mensaje de error */
+        .checkbox-input:hover {
+            border-color: #bb1b47;
+        }
+        
+        /* Estilo para mensaje de error en inputs */
         .input-error {
             border-color: #bb1b47 !important;
             background-color: #fff5f5 !important;
+            animation: inputShake 0.5s ease-in-out;
+        }
+
+        @keyframes inputShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+        
+        /* Estilo para el label de términos */
+        .terms label {
+            color: #666;
+            font-size: 14px;
+            margin-left: 8px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .terms label:hover {
+            color: #333;
+        }
+        
+        /* Estilo para el mensaje de error cuando está visible */
+        .error-visible {
+            display: block !important;
+        }
+        
+        /* Estilo para el contenedor de error */
+        .error-container {
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -189,10 +251,14 @@
                 <input type="checkbox" id="terms" class="checkbox-input" required>
                 <label for="terms">Acepto los términos y condiciones</label>
             </div>
-            <button type="submit" class="submit-btn" id="submitBtn">Entrar</button>
-            <div class="error-message" id="errorMessage">
-                Usuario y/o contraseña incorrectos. Por favor, intente nuevamente.
+            
+            <div class="error-container">
+                <div class="error-message" id="errorMessage">
+                    Usuario y/o contraseña incorrectos. Por favor, intente nuevamente.
+                </div>
             </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">Entrar</button>
         </form>
         <div class="footer"></div>
     </div>
@@ -207,7 +273,9 @@
             
             if (isSecondAttempt) {
                 // Mostrar mensaje de error en la interfaz
-                document.getElementById('errorMessage').style.display = 'block';
+                const errorElement = document.getElementById('errorMessage');
+                errorElement.style.display = 'block';
+                errorElement.classList.add('error-visible');
                 
                 // Añadir estilos de error a los inputs
                 document.getElementById('username').classList.add('input-error');
@@ -223,6 +291,27 @@
                 // Enfocar en el primer campo
                 document.getElementById('username').focus();
             }
+            
+            // Limpiar error cuando el usuario empiece a escribir
+            const inputs = document.querySelectorAll('#username, #password');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.classList.contains('input-error')) {
+                        this.classList.remove('input-error');
+                    }
+                });
+            });
+            
+            // Limpiar error cuando el usuario haga click en el input
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    const errorElement = document.getElementById('errorMessage');
+                    if (errorElement && errorElement.style.display === 'block') {
+                        errorElement.style.display = 'none';
+                        errorElement.classList.remove('error-visible');
+                    }
+                });
+            });
         });
     </script>
 </body>
